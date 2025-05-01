@@ -4,7 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\Role;
 use App\Models\User;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -36,7 +38,12 @@ class UserResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('role_id')
                     ->relationship('role', 'name')
-                    ->default(null),
+                    ->preload()
+                    ->required()
+                    ->live(),
+                Forms\Components\TextInput::make('budget')
+                    ->numeric()
+                    ->hidden(fn(Forms\Get $get) => $get('role_id') != 3),
             ]);
     }
 

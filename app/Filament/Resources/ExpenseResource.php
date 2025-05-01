@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExpenseResource\Pages;
 use App\Filament\Resources\ExpenseResource\RelationManagers;
 use App\Models\Expense;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,7 +13,9 @@ use Filament\Tables;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Components\Tab;
 use Illuminate\Support\Facades\Storage;
 
 class ExpenseResource extends Resource
@@ -20,6 +23,7 @@ class ExpenseResource extends Resource
     protected static ?string $model = Expense::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
 
     public static function form(Form $form): Form
     {
@@ -73,10 +77,20 @@ class ExpenseResource extends Resource
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('debit')
+                Tables\Columns\TextColumn::make('debit_summary')
                     ->label('Debit')
-                    ->getStateUsing(fn($record) => $record->type === 'Debit' ? '-' . number_format($record->amount, 2) : null)
-                    ->color(fn($record) => $record->type === 'Debit' ? 'danger' : null),
+                    ->state(fn($record) => $record->type === 'Debit' ? $record->amount : 0)
+                    ->numeric(decimalPlaces: 2)
+                    ->money(),
+                // ->summarize([
+                //     Tables\Columns\Summarizers\Sum::make()
+                //         ->label('Total Debit')
+                //         ->using(function () {
+                //             return Expense::where('type', 'Debit')->sum('amount');
+                //         })
+                //         ->formatStateUsing(fn($state) => number_format($state, 2))
+                //         ->money()
+                // ]),
 
                 Tables\Columns\TextColumn::make('credit')
                     ->label('Credit')
@@ -87,6 +101,15 @@ class ExpenseResource extends Resource
                     ->label('Logged On')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultGroup('date')
+            ->groups([
+                Group::make('date')
+                    ->label('Month')
+                    ->getTitleFromRecordUsing(function (Expense $record) {
+                        return $record->date->format('F Y'); // e.g. "March 2024"
+                    })
+                    ->collapsible()
             ])
             ->filters([
                 //
@@ -107,7 +130,6 @@ class ExpenseResource extends Resource
             //
         ];
     }
-
     public static function getPages(): array
     {
         return [

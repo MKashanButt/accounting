@@ -21,6 +21,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('roles')
                 ->nullOnDelete();
+            $table->integer('budget')
+                ->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
