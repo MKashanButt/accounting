@@ -35,7 +35,6 @@ class ExpenseResource extends Resource
                     ->required()
                     ->columnSpanFull(),
                 Forms\Components\FileUpload::make('file')
-                    ->required()
                     ->columnSpanFull(),
                 Forms\Components\Select::make('type')
                     ->options([
@@ -87,12 +86,12 @@ class ExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('debit_summary')
                     ->label('Debit')
                     ->state(fn($record) => $record->type === 'Debit' ? number_format($record->amount, 2) : null)
-                    ->color(fn($record) => $record->type === 'Debit' ? 'danger' : null),
+                    ->color(fn($record) => $record->type === 'Debit' ? 'success' : null),
 
                 Tables\Columns\TextColumn::make('credit')
                     ->label('Credit')
                     ->getStateUsing(fn($record) => $record->type === 'Credit' ? number_format($record->amount, 2) : null)
-                    ->color(fn($record) => $record->type === 'Credit' ? 'success' : null),
+                    ->color(fn($record) => $record->type === 'Credit' ? 'danger' : null),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Logged On')

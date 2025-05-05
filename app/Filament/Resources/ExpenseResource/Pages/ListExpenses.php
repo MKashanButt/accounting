@@ -41,12 +41,12 @@ class ListExpenses extends ListRecords
                     'user_id',
                     $manager->id
                 )
-                    ->where('type', 'debit')
+                    ->where('type', 'credit')
                     ->value('amount') + Expense::where(
                         'user_id',
                         $manager->id
                     )
-                    ->where('type', 'credit')
+                    ->where('type', 'debit')
                     ->value('amount'));
         }
 
