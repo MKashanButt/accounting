@@ -9,6 +9,7 @@ use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Capsule\Manager;
 
 class ListExpenses extends ListRecords
 {
@@ -36,9 +37,19 @@ class ListExpenses extends ListRecords
         foreach ($managers as $manager) {
             $tabs[$manager->name] = Tab::make($manager->name)
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('user_id', $manager->id))
-                ->badge($manager->budget);
+                ->badge($manager->budget - Expense::where(
+                    'user_id',
+                    $manager->id
+                )
+                    ->where('type', 'debit')
+                    ->value('amount') + Expense::where(
+                        'user_id',
+                        $manager->id
+                    )
+                    ->where('type', 'credit')
+                    ->value('amount'));
         }
 
-        return $tabs;;
+        return $tabs;
     }
 }

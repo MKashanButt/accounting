@@ -47,7 +47,14 @@ class ExpenseResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
+                    ->label('Users')
+                    ->options(
+                        User::whereHas('role', function ($q) {
+                            $q->where('name', 'manager'); // Adjust this condition as needed
+                        })
+                            ->pluck('name', 'id') // This assumes you want name as option text and id as value
+                            ->toArray()
+                    )
                     ->default(null),
             ]);
     }
@@ -79,18 +86,8 @@ class ExpenseResource extends Resource
 
                 Tables\Columns\TextColumn::make('debit_summary')
                     ->label('Debit')
-                    ->state(fn($record) => $record->type === 'Debit' ? $record->amount : 0)
-                    ->numeric(decimalPlaces: 2)
-                    ->money(),
-                // ->summarize([
-                //     Tables\Columns\Summarizers\Sum::make()
-                //         ->label('Total Debit')
-                //         ->using(function () {
-                //             return Expense::where('type', 'Debit')->sum('amount');
-                //         })
-                //         ->formatStateUsing(fn($state) => number_format($state, 2))
-                //         ->money()
-                // ]),
+                    ->state(fn($record) => $record->type === 'Debit' ? number_format($record->amount, 2) : null)
+                    ->color(fn($record) => $record->type === 'Debit' ? 'danger' : null),
 
                 Tables\Columns\TextColumn::make('credit')
                     ->label('Credit')

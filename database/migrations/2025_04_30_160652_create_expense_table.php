@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->text('description');
-            $table->text('file');
+            $table->text('file')
+                ->nullable();
             $table->enum('type', [
                 'Debit',
                 'Credit'
